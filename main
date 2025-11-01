@@ -1,0 +1,99 @@
+import argparse
+
+LANGUAGES = ["est"]
+
+
+def est(number):
+    """
+    Takes in a number and returns it in Estonian spelling
+
+    Args:
+        number(int): a number in between 0 and 999,999.
+    
+    Returns:
+        str: The Estonian spelled word of the number(s) given
+
+    """
+
+    if not 0 <= number <= 999_999:
+        return "Number is out of range."
+    
+    ones = ["", "üks", "kaks", "kolm", "neli", "viis", "kuus", "seitse", 
+        "kaheksa", "üheksa"]
+    teens = ["kümme", "üksteist", "kaksteist", "kolmteist", "neliteist", 
+        "viisteist", "kuusteist", "seitseteist", "kaheksateist", 
+        "üheksateist"]
+    tens =  ["", "", "kakskümmend", "kolmkümmend", "nelikümmend", 
+        "viiskümmend", "kuuskümmend", "seitsekümmend", "kaheksakümmend", 
+        "üheksakümmend"]
+    hundreds = ["sada","kakssada", "kolmsada", "nelisada", "viissada", 
+        "kuussada", "seitsesada", "kaheksasada", "üheksasada", ""]
+   
+    
+    if number == 0:
+        return "null"
+    elif 1 <= number <= 9:
+        return ones[number]
+    elif 10 <= number <= 19:
+        return teens[number - 10]
+    elif 20 <= number <= 99:
+        return tens[number//10] + (' '+ ones[number%10] 
+                                   if number % 10!= 0 else "")
+    elif 100 <= number <= 999:
+        return hundreds[(number//100)-1] + (' ' + est(number%100) 
+                                            if number % 100 != 0 else "")
+    elif 1000 <= number <= 9999:
+        thousands = number // 1000
+        rest = number % 1000
+        if thousands == 1:
+            return "tuhat" + (' ' + est(rest) if rest != 0 else "")
+        else:
+            return est(thousands) + " tuhat" + (' ' + est(rest) if rest != 0 
+                                                else "")
+    elif 10_000 <= number <= 99_999:
+       return est(number//1000) + ' ' + "tuhat" + (' ' + est(number % 1000) 
+                                                if number % 1000 != 0 else "")
+    elif 100_000 <= number <= 999_999:
+        return est(number//1000) + ' ' + "tuhat" + (' ' + est(number % 1000) 
+                                                if number % 1000 != 0 else "")
+    
+def main(language_code, input_file, output_file):
+    """ 
+    The Main function converts the numbers given to it into estonian spelling
+    
+    Args:
+        language_code(str): The language for which the code understands
+        input_file(str): Path to the input file
+        output_file(str): Path to the output file
+        
+    Returns:
+        None
+        
+    Side effects:
+        Modifies the output file
+        
+    Raises:
+        ValueError: If the language code is incorrect
+    """
+
+    if language_code not in LANGUAGES:
+        raise ValueError(f"Invalid Language Code. Supported languages are: "
+                             f"{LANGUAGES}")
+
+    with open(input_file, "r", encoding = "UTF-8") as file, open(
+        output_file, 'w', encoding="UTF-8") as file_out:
+        for line in file:
+            number = int(line.strip())
+            spelled_number = est(number)
+            file_out.write(f"{number} = {spelled_number}\n")
+    
+        
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description= "Spells numbers in Estonian")
+    parser.add_argument("lang_code", help="Only est is supported")
+    parser.add_argument("input_file", help="Path to the input file with numbers")
+    parser.add_argument("output_file", help="Path to the output file for result")
+    args = parser.parse_args()
+    
+    
+    main(args.lang_code, args.input_file, args.output_file)
